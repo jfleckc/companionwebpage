@@ -1,1 +1,94 @@
-<h1>Hello</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bitfocus Companion Wrapper</title>
+    <link rel="manifest" id="manifestPlaceholder">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: fixed;
+        }
+        
+        #webview {
+            width: 100%;
+            height: 100%;
+            border: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        
+        #fullscreenButton {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            padding: 8px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button id="fullscreenButton">Fullscreen</button>
+    <iframe id="webview" src="http://192.168.0.53:8888/emulator/emulator"></iframe>
+
+    <script>
+        // Generate and set manifest dynamically
+        const manifestData = {
+            "name": "Bitfocus Companion",
+            "short_name": "Companion",
+            "start_url": ".",
+            "display": "standalone",
+            "orientation": "landscape",
+            "background_color": "#000000",
+            "theme_color": "#000000",
+            "icons": [{
+                "src": "https://companion.bitfocus.io/img/favicon.png",
+                "sizes": "192x192",
+                "type": "image/png"
+            }]
+        };
+
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.getElementById('manifestPlaceholder').setAttribute('href', manifestURL);
+
+        // Fullscreen handling
+        const fullscreenButton = document.getElementById('fullscreenButton');
+        
+        fullscreenButton.addEventListener('click', () => {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
+        });
+
+        // Hide button when in fullscreen
+        document.addEventListener('fullscreenchange', () => {
+            fullscreenButton.style.display = document.fullscreenElement ? 'none' : 'block';
+        });
+
+        // Prevent scrolling and zooming
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        // Lock orientation to landscape
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape')
+                .catch((error) => console.log('Orientation lock failed:', error));
+        }
+    </script>
+</body>
+</html>
